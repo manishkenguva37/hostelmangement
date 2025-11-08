@@ -415,27 +415,20 @@ export default {
 //     headers: {  "Content-Type": "application/json" } // ✅ no preflight
 //   }
 // );
-// await axios.post(
-//   import.meta.env.VITE_API_PROXY, // points to localhost:8080
-//   this.students, // no need to JSON.stringify; axios does it
-//   {
-//     headers: { "Content-Type": "application/json" }
-//   }
-// )
-// .then(res => {
-//   console.log("Synced:", res.data);
-// })
-// .catch(err => {
-//   console.error("Sync error:", err);
-// });
 await axios.post(
-  "/api/students", // Vercel automatically maps `/api/students` to your function
-  this.students,
+  import.meta.env.VITE_GOOGLE_SHEETS_URL, // points to localhost:8080
+  this.students, // no need to JSON.stringify; axios does it
   {
-    headers: { "Content-Type": "application/json" }
+    headers: { "Content-Type": "text.palin" }
   }
-);
-        alert("Synced to Google Sheet");
+)
+.then(res => {
+  console.log("Synced:", res.data);
+})
+.catch(err => {
+  console.error("Sync error:", err);
+});
+    alert("Synced to Google Sheet");
       } catch {
         alert("Sync failed");
       } finally {
