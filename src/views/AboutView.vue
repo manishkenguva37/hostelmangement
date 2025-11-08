@@ -1,6 +1,6 @@
 <template>
   <div class="test-page">
-    <h2>Student Manager</h2>
+    <h2>Student Manager cdd</h2>
 
     <div class="controls">
       <input v-model="search" placeholder="Search by name / room / email" />
