@@ -27,7 +27,8 @@ const router = new VueRouter({
       path: '/upload2',
       name: 'upload2',
       component: () => import('../views/upload2.vue')
-    }
+    },
+    { path: '/:catchAll(.*)', redirect: '/' } 
   ]
 })
 

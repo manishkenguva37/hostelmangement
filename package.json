@@ -6,6 +6,7 @@
     "preview": "vite preview --port 4173",
     "test:unit": "vitest --environment jsdom",
     "dev": "vite --host",
+     "postbuild": "cp public/_redirects dist/_redirects", 
     "dev:open": "vite --host && sleep 5 && open https://$(gp url 5173)",
     "start": "vite --host && sleep 7 && open $(gp url 5173)"
   },
