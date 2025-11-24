@@ -84,7 +84,19 @@
                   @error="e => e.target.src = placeholder"
                 />
               </td>
-              <td>{{ s.id }}</td>
+              <!-- <td>{{ s.id }}</td> -->
+               <td>
+               <!-- <router-link
+              class="text-primary font-weight-bold"
+              :to="{ path: '/student', query: { viewdetails: s.id } }"
+            >
+              {{ s.id }}
+            </router-link> -->
+            <button class="btn btn-primary btn-sm" @click="viewDetails(s)">
+            {{ s.id }}
+          </button>
+            </td>
+
               <td>{{ s.name }}</td>
               <td>{{ s.email }}</td>
               <td>{{ getLatestRoom(s.room) }}</td>
@@ -274,6 +286,13 @@ export default {
     this.fetchStudents();
   },
   methods: {
+       viewDetails(student) {
+      // store data in route meta before navigating
+      const route = this.$router.resolve({ name: "ViewStudent" });
+      route.route.meta.student = student;
+      this.$router.push(route.route);
+    },
+  
     formatDate(val) {
       if (!val) return "-";
       const d = new Date(val);
@@ -293,63 +312,34 @@ export default {
         this.loading = false;
       }
     },
-   //async saveStudent() {
-    //  const action = this.form.id ? "update" : "create";
-    //  const now = new Date().toISOString();
-    //  this.form.timestamp = now;
-    //  this.form.room = JSON.stringify([{ ...this.newRoom, timeStamp: now }]);
-     // try {
-     //   this.loading = true;
-        // await axios.post(this.apiUrl, JSON.stringify({ ...this.form, action }), {
-     //     headers: { "Content-Type": "text/plain" },
-    //     });
-    //     await this.fetchStudents();
-    //     this.resetForm();
-    //     alert(`Student ${action === "create" ? "added" : "updated"} successfully`);
-    //   } catch {
-    //     alert("Save failed");
-    //   } finally {
-    //     this.loading = false;
-    //   }
-    // },
-
-
-
-
     async saveStudent() {
-  const action = this.form.id ? "update" : "create";
-  const now = new Date().toISOString();
+      const action = this.form.id ? "update" : "create";
+      const now = new Date().toISOString();
 
-  // Parse existing rooms
-  let oldRooms = [];
-  if (this.form.room) {
-    try {
-      oldRooms = JSON.parse(this.form.room);
-    } catch {}
-  }
+      // Merge old and new rooms
+      let oldRooms = [];
+      if (this.form.room) {
+        try { oldRooms = JSON.parse(this.form.room); } catch {}
+      }
+      if (this.newRoom.roomNumber) {
+        oldRooms.push({ ...this.newRoom, timeStamp: now });
+      }
+      this.form.room = JSON.stringify(oldRooms);
 
-  // Add the new room if roomNumber is set
-  if (this.newRoom.roomNumber) {
-    oldRooms.push({ ...this.newRoom, timeStamp: now });
-  }
-
-  // Update form room with merged array
-  this.form.room = JSON.stringify(oldRooms);
-
-  try {
-    this.loading = true;
-    await axios.post(this.apiUrl, JSON.stringify({ ...this.form, action }), {
-      headers: { "Content-Type": "text/plain" },
-    });
-    await this.fetchStudents();
-    this.resetForm();
-    alert(`Student ${action === "create" ? "added" : "updated"} successfully`);
-  } catch {
-    alert("Save failed");
-  } finally {
-    this.loading = false;
-  }
-},
+      try {
+        this.loading = true;
+        await axios.post(this.apiUrl, JSON.stringify({ ...this.form, action }), {
+          headers: { "Content-Type": "text/plain" },
+        });
+        await this.fetchStudents();
+        this.resetForm();
+        alert(`Student ${action === "create" ? "added" : "updated"} successfully`);
+      } catch {
+        alert("Save failed");
+      } finally {
+        this.loading = false;
+      }
+    },
     async deleteStudent(id) {
       if (!confirm("Delete this student?")) return;
       try {
@@ -439,40 +429,57 @@ export default {
         alert("jsPDF not loaded");
       }
     },
+
+    // ✅ Fixed preflight-safe Google Sheets sync
+    // async syncGoogleSheet() {
+    //   const endpoint = import.meta.env.VITE_GOOGLE_SHEETS_URL;
+    //   if (!endpoint) return alert("Set VITE_GOOGLE_SHEETS_URL in .env");
+
+    //   try {
+    //     this.loading = true;
+
+    //     const payload = {
+    //       action: "create",
+    //       students: this.students
+    //     };
+
+    //     await axios.post(endpoint, payload, {
+    //       headers: { "Content-Type": "text/plain" }
+    //     });
+
+    //     alert("Synced to Google Sheet successfully!");
+    //   } catch (err) {
+    //     console.error("Sync error:", err);
+    //     alert("Sync failed. Check console for details.");
+    //   } finally {
+    //     this.loading = false;
+    //   }
+    // },
     async syncGoogleSheet() {
-     
-      const endpoint = import.meta.env.VITE_GOOGLE_SHEETS_URL;
-      if (!endpoint) return alert("Set VITE_GOOGLE_SHEETS_URL in .env");
-      let student = this.students;
-      try {
-        this.loading = true;
-//        await axios.post(
-//   import.meta.env.VITE_API_PROXY,
-//   JSON.stringify(this.students),
-//   {
-//     headers: {  "Content-Type": "application/json" } // ✅ no preflight
-//   }
-// );
-await axios.post(
-  import.meta.env.VITE_GOOGLE_SHEETS_URL, // points to localhost:8080
-  this.students, // no need to JSON.stringify; axios does it
-  {
-    headers: { "Content-Type": "text.palin" }
+  const endpoint = import.meta.env.VITE_GOOGLE_SHEETS_URL;
+  if (!endpoint) return alert("Set VITE_GOOGLE_SHEETS_URL in .env");
+
+  try {
+    this.loading = true;
+
+    const payload = {
+      action: "create",
+      students: this.students
+    };
+
+    // ✅ Use text/plain to skip CORS preflight
+    await axios.post(endpoint, JSON.stringify(payload), {
+      headers: { "Content-Type": "text/plain" }
+    });
+
+    alert("✅ Synced to Google Sheet successfully!");
+  } catch (err) {
+    console.error("❌ Sync error:", err);
+    alert("❌ Sync failed. Check console for details.");
+  } finally {
+    this.loading = false;
   }
-)
-.then(res => {
-  console.log("Synced:", res.data);
-})
-.catch(err => {
-  console.error("Sync error:", err);
-});
-    alert("Synced to Google Sheet");
-      } catch {
-        alert("Sync failed");
-      } finally {
-        this.loading = false;
-      }
-    },
+}
   },
 };
 </script>
