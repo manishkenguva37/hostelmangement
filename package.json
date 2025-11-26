@@ -11,6 +11,7 @@
     "start": "vite --host && sleep 7 && open $(gp url 5173)"
   },
   "dependencies": {
+    "@welldone-software/why-did-you-render": "^10.0.1",
     "axios": "^1.13.2",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",

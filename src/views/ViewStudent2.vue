@@ -198,6 +198,8 @@
 import axios from "axios"
 
 export default {
+  name:"vue Students 2",
+
   data() {
     return {
       student: {},
