@@ -1,8 +1,13 @@
 <template>
-  <router-view></router-view> 
+
+   <div >
+    <router-view />
+    <MemoryPanel />
+  </div>
 </template>
 
 <script>
+import MemoryPanel from "./MemoryPanel.vue";
 // If you want a global header/footer, you would place them outside the router-view.
 // For example:
 // <template>
@@ -11,7 +16,10 @@
 //   <AppFooter />
 // </template>
 export default {
-  name: 'App'
+  name: 'App',
+  components: {
+    MemoryPanel,
+  },
 };
 </script>
 
